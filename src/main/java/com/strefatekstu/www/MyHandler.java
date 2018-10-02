@@ -1,34 +1,57 @@
 package com.strefatekstu.www;
 
-import com.strefatekstu.www.models.Employee;
-import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.util.List;
+import java.io.File;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 public class MyHandler extends DefaultHandler {
-    private List<Employee> emplist = null;
-    private Employee emp = null;
+    private Hashtable tags;
 
-    public List<Employee> getEmplist(){
-        return emplist;
+    public void startDocument() throws SAXException {
+        tags = new Hashtable();
     }
 
-    boolean bAge = false;
-    boolean bName = false;
-    boolean bGender = false;
-    boolean bRole = false;
-
-    public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-        if (qName.equalsIgnoreCase("Employee")) {
-            String id = attributes.getValue("id");
-//            emp = new Employee();
-
+    public void endDocument() throws SAXException {
+        Enumeration e = tags.keys();
+        while (e.hasMoreElements()) {
+            String tag = (String) e.nextElement();
+            int count = ((Integer) tags.get(tag)).intValue();
+            System.out.println("Local Name \"" + tag + "\" occurs " + count + " times");
         }
     }
 
-    public void endElement() throws SAXException {
+    public static void main(String[] args) throws Exception {
+        String filename = null;
 
+        for (int i = 0; i < args.length; i++) {
+            filename = args[i];
+            if (i != args.length - 1) {
+                usage();
+            }
+        }
+        if (filename == null) {
+            usage();
+        }
+    }
+
+    //    convert string filename
+    private static String convertToFileURL(String filename) {
+        String path = new File(filename).getAbsolutePath();
+        if (File.separatorChar != '/') {
+            path = path.replace(File.separatorChar, '/');
+        }
+        if (!path.startsWith("/")) {
+            path = "/" + path;
+        }
+        return "file:" + path;
+    }
+
+    private static void usage() {
+        System.err.println("Usage: SAXLocalNameCount <file.xml>");
+        System.err.println(" - usage or -help = this.message");
+        System.exit(1);
     }
 }
